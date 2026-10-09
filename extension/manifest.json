@@ -1,0 +1,1 @@
+{"manifest_version":3,"name":"Cyber Drishti AI","version":"1.0.0","description":"Review the current tab URL in Cyber Drishti AI before taking action.","permissions":["activeTab","storage"],"action":{"default_popup":"popup.html","default_title":"Check this URL with Cyber Drishti AI"}}

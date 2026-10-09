@@ -1,0 +1,5 @@
+import type { Report } from './analysis';
+export function notifyScan(report:Report){
+ try {if(localStorage.getItem('cyber-notifications')==='true'&&'Notification'in window&&Notification.permission==='granted')new Notification('Cyber Drishti AI',{body:report.lookup==='match'?'A requested scan identified a known threat.':report.category==='Unknown'?'Scan complete: destination could not be verified.':`Scan complete: ${report.category.toLowerCase()} risk assessment.`,tag:report.id});}catch{/* A denied device alert must not interrupt results. */}
+ try {if(localStorage.getItem('cyber-alert-sounds')==='true'){const ctx=new AudioContext();const gain=ctx.createGain();gain.gain.setValueAtTime(.025,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.2);gain.connect(ctx.destination);const oscillator=ctx.createOscillator();oscillator.frequency.value=440;oscillator.connect(gain);oscillator.start();oscillator.stop(ctx.currentTime+.22);oscillator.onended=()=>{void ctx.close();};}}catch{/* Sound is optional. */}
+}

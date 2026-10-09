@@ -14,13 +14,75 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      scan_history: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          result: Json
+          target: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          result: Json
+          target: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          result?: Json
+          target?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      scan_limits: {
+        Row: {
+          key: string
+          requests: number
+          window_start: string
+        }
+        Insert: {
+          key: string
+          requests?: number
+          window_start: string
+        }
+        Update: {
+          key?: string
+          requests?: number
+          window_start?: string
+        }
+        Relationships: []
+      }
+      threat_cache: {
+        Row: {
+          expires_at: string
+          key: string
+          result: Json
+        }
+        Insert: {
+          expires_at: string
+          key: string
+          result: Json
+        }
+        Update: {
+          expires_at?: string
+          key?: string
+          result?: Json
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      consume_scan_limit: { Args: { p_key: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

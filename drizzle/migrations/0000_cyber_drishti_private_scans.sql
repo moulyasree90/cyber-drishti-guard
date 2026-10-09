@@ -1,0 +1,16 @@
+CREATE TABLE public.scan_history (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), user_id uuid NOT NULL, kind text NOT NULL CHECK(kind IN ('url','message','shopping')), target text NOT NULL CHECK(length(target) <= 12000), result jsonb NOT NULL, created_at timestamptz NOT NULL DEFAULT now());
+GRANT SELECT, DELETE ON public.scan_history TO authenticated;
+GRANT ALL ON public.scan_history TO service_role;
+ALTER TABLE public.scan_history ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Read own scans" ON public.scan_history FOR SELECT TO authenticated USING(auth.uid() = user_id);
+CREATE POLICY "Delete own scans" ON public.scan_history FOR DELETE TO authenticated USING(auth.uid() = user_id);
+CREATE INDEX scan_history_owner_time ON public.scan_history(user_id, created_at DESC);
+CREATE TABLE public.scan_limits (key text PRIMARY KEY, window_start timestamptz NOT NULL, requests integer NOT NULL DEFAULT 1);
+GRANT ALL ON public.scan_limits TO service_role;
+ALTER TABLE public.scan_limits ENABLE ROW LEVEL SECURITY;
+CREATE TABLE public.threat_cache (key text PRIMARY KEY, result jsonb NOT NULL, expires_at timestamptz NOT NULL);
+GRANT ALL ON public.threat_cache TO service_role;
+ALTER TABLE public.threat_cache ENABLE ROW LEVEL SECURITY;
+CREATE FUNCTION public.consume_scan_limit(p_key text) RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$ DECLARE n integer; BEGIN INSERT INTO public.scan_limits(key, window_start, requests) VALUES(p_key, now(), 1) ON CONFLICT(key) DO UPDATE SET requests = CASE WHEN scan_limits.window_start < now() - interval '1 minute' THEN 1 ELSE scan_limits.requests + 1 END, window_start = CASE WHEN scan_limits.window_start < now() - interval '1 minute' THEN now() ELSE scan_limits.window_start END RETURNING requests INTO n; RETURN n <= 10; END; $$;
+REVOKE ALL ON FUNCTION public.consume_scan_limit(text) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.consume_scan_limit(text) TO service_role;

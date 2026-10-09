@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      lesson_rewards: {
+        Row: {
+          earned_at: string
+          lesson: string
+          points: number
+          user_id: string
+        }
+        Insert: {
+          earned_at?: string
+          lesson: string
+          points?: number
+          user_id: string
+        }
+        Update: {
+          earned_at?: string
+          lesson?: string
+          points?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       scan_history: {
         Row: {
           created_at: string
@@ -82,6 +103,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      complete_safety_lesson: {
+        Args: { p_answer: number; p_lesson: string }
+        Returns: boolean
+      }
       consume_scan_limit: { Args: { p_key: string }; Returns: boolean }
     }
     Enums: {
